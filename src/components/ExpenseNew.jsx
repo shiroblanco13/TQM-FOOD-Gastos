@@ -1,10 +1,12 @@
-import React, { useRef, useState } from "react";
-import { Camera, FileText, ScanText, X, Loader2 } from "lucide-react";
+import React, { useMemo, useRef, useState } from "react";
+import { Camera, FileText, ScanText, X, Loader2, History, MapPin, Route } from "lucide-react";
 import { useApp } from "../context/AppContext.jsx";
 import { saveGastos, uploadAdjunto } from "../lib/db.js";
 import { recognizeTicket, extractImporte, extractFecha } from "../lib/ocr.js";
+import { hasMapsKey, computeDistanceKm } from "../lib/googleMaps.js";
 import { CATEGORIAS_GASTO, COLORS, fmtMoney, inputStyle, labelStyle, primaryBtn, secondaryBtn } from "../theme.js";
 import { SectionTitle, Banner, Card } from "./UI.jsx";
+import AddressAutocomplete from "./AddressAutocomplete.jsx";
 
 const today = () => new Date().toISOString().slice(0, 10);
 
@@ -25,6 +27,48 @@ export default function ExpenseNew() {
 
   const tarifaKm = config?.tarifaKm ?? 0.26;
   const importeKm = (Number(kmForm.km) || 0) * tarifaKm;
+
+  const misTrayectosKm = useMemo(
+    () => gastos.filter((g) => g.username === session.username && g.tipo === "kilometraje").sort((a, b) => b.creadoEn - a.creadoEn),
+    [gastos, session]
+  );
+  const origenHabitual = misTrayectosKm[0]?.origen || "";
+  const trayectosFrecuentes = useMemo(() => {
+    const vistos = new Map();
+    for (const g of misTrayectosKm) {
+      const clave = `${g.origen}|${g.destino}`.toLowerCase();
+      if (!vistos.has(clave)) vistos.set(clave, g);
+    }
+    return [...vistos.values()].slice(0, 5);
+  }, [misTrayectosKm]);
+
+  function usarOrigenHabitual() {
+    setKmForm((f) => ({ ...f, origen: origenHabitual }));
+  }
+
+  function usarTrayecto(t) {
+    setKmForm((f) => ({ ...f, origen: t.origen, destino: t.destino, km: String(t.km) }));
+  }
+
+  const [calculandoKm, setCalculandoKm] = useState(false);
+  const [errorKm, setErrorKm] = useState("");
+
+  async function calcularKmAutomaticamente() {
+    if (!kmForm.origen.trim() || !kmForm.destino.trim()) {
+      setErrorKm("Rellena origen y destino primero.");
+      return;
+    }
+    setCalculandoKm(true);
+    setErrorKm("");
+    try {
+      const km = await computeDistanceKm(kmForm.origen.trim(), kmForm.destino.trim());
+      setKmForm((f) => ({ ...f, km: String(km) }));
+    } catch (e) {
+      setErrorKm(e.message);
+    } finally {
+      setCalculandoKm(false);
+    }
+  }
 
   function handleFile(e) {
     const f = e.target.files?.[0];
@@ -154,16 +198,63 @@ export default function ExpenseNew() {
             <label style={labelStyle}>Fecha</label>
             <input style={inputStyle} type="date" value={kmForm.fecha} onChange={(e) => setKmForm((f) => ({ ...f, fecha: e.target.value }))} />
 
+            {trayectosFrecuentes.length > 0 && (
+              <div style={{ marginBottom: 10 }}>
+                <label style={labelStyle}><History size={11} style={{ verticalAlign: -1 }} /> Trayectos recientes</label>
+                <div style={{ display: "flex", gap: 6, overflowX: "auto", paddingBottom: 2 }}>
+                  {trayectosFrecuentes.map((t) => (
+                    <button
+                      key={t.id}
+                      type="button"
+                      onClick={() => usarTrayecto(t)}
+                      style={{
+                        flexShrink: 0, border: `1px solid ${COLORS.line}`, background: "#fff", borderRadius: 8,
+                        padding: "7px 10px", fontSize: 11.5, color: COLORS.ink, cursor: "pointer", textAlign: "left",
+                      }}
+                    >
+                      <div style={{ fontWeight: 600 }}>{t.origen || "?"} → {t.destino || "?"}</div>
+                      <div style={{ color: COLORS.inkSoft }}>{t.km} km</div>
+                    </button>
+                  ))}
+                </div>
+              </div>
+            )}
+
             <div style={{ display: "flex", gap: 8 }}>
               <div style={{ flex: 1 }}>
-                <label style={labelStyle}>Origen</label>
-                <input style={inputStyle} value={kmForm.origen} onChange={(e) => setKmForm((f) => ({ ...f, origen: e.target.value }))} />
+                <div style={{ display: "flex", justifyContent: "space-between", alignItems: "center" }}>
+                  <label style={labelStyle}>Origen</label>
+                  {origenHabitual && origenHabitual !== kmForm.origen && (
+                    <button type="button" onClick={usarOrigenHabitual} style={{
+                      background: "none", border: "none", color: COLORS.ink, fontSize: 10.5, fontWeight: 600,
+                      cursor: "pointer", padding: 0, display: "flex", alignItems: "center", gap: 2,
+                    }}>
+                      <MapPin size={10} /> El habitual
+                    </button>
+                  )}
+                </div>
+                <AddressAutocomplete value={kmForm.origen} onChange={(v) => setKmForm((f) => ({ ...f, origen: v }))} />
               </div>
               <div style={{ flex: 1 }}>
                 <label style={labelStyle}>Destino</label>
-                <input style={inputStyle} value={kmForm.destino} onChange={(e) => setKmForm((f) => ({ ...f, destino: e.target.value }))} />
+                <AddressAutocomplete value={kmForm.destino} onChange={(v) => setKmForm((f) => ({ ...f, destino: v }))} />
               </div>
             </div>
+
+            {hasMapsKey() && (
+              <div style={{ marginTop: 8, marginBottom: 4 }}>
+                <button
+                  type="button"
+                  onClick={calcularKmAutomaticamente}
+                  disabled={calculandoKm}
+                  style={{ ...secondaryBtn, display: "flex", alignItems: "center", justifyContent: "center", gap: 6, opacity: calculandoKm ? 0.6 : 1 }}
+                >
+                  {calculandoKm ? <Loader2 size={14} style={{ animation: "spin 1s linear infinite" }} /> : <Route size={14} />}
+                  {calculandoKm ? "Calculando…" : "Calcular km automáticamente"}
+                </button>
+                {errorKm && <div style={{ fontSize: 11.5, color: COLORS.red, marginTop: 5 }}>{errorKm}</div>}
+              </div>
+            )}
 
             <label style={labelStyle}>Kilómetros</label>
             <input style={inputStyle} type="number" step="0.1" min="0" value={kmForm.km}

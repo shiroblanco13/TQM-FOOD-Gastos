@@ -154,6 +154,39 @@ del mes. Se descarga en el dispositivo y además se guarda automáticamente
 dentro de la carpeta de ese mes en Google Drive (junto a las carpetas de
 cada persona), como `informe_<mes>_<año>.pdf`.
 
+## Buscador de direcciones y cálculo automático de km (opcional)
+
+En el formulario de kilometraje, los campos "Origen" y "Destino" pueden
+mostrar sugerencias de Google Maps mientras se escribe, y hay un botón
+"Calcular km automáticamente" que rellena los kilómetros con la distancia
+real en coche entre las dos direcciones. Es totalmente opcional: sin
+configurarlo, esos campos siguen funcionando como texto libre normal, sin
+sugerencias ni cálculo automático.
+
+Para activarlo:
+
+1. En el mismo proyecto de Google Cloud que ya usas para Drive (o en uno
+   nuevo), ve a **Facturación** y vincula una tarjeta. Con 5 usuarios el
+   uso esperado se queda muy por debajo del crédito gratuito mensual que
+   da Google, pero Google exige tener una tarjeta asociada para activar
+   estas APIs, aunque no llegue a cobrarse nada.
+2. En **APIs y servicios → Biblioteca**, habilita: **Places API (New)**,
+   **Routes API** y **Maps JavaScript API**.
+3. En **APIs y servicios → Credenciales → Crear credenciales → Clave de
+   API** (no un ID de cliente OAuth, esto es distinto). Edítala y
+   restríngela:
+   - **Restricciones de aplicación**: "Sitios web", y añade tu dominio de
+     Netlify, por ejemplo `https://tqmfoodgastos.netlify.app/*`.
+   - **Restricciones de API**: limita la clave solo a las 3 APIs del
+     paso 2.
+4. Añade esa clave como `VITE_GOOGLE_MAPS_API_KEY` en Netlify (Environment
+   variables) y vuelve a desplegar.
+
+A diferencia de la clave de Drive, esta clave de Maps **sí** puede ir en
+el navegador — es la forma en que Google recomienda usarla para apps sin
+servidor propio, protegida por la restricción de dominio del paso 3 en
+vez de mantenerse en secreto.
+
 ## Cómo funciona el OCR
 
 Al adjuntar una foto de ticket aparece el botón **"Extraer importe y
