@@ -80,8 +80,9 @@ export default function ExpenseNew() {
     setSubmitBusy(true);
     try {
       const id = `${Date.now()}-${Math.random().toString(36).slice(2, 7)}`;
+      const fechaRegistro = tipo === "gasto" ? gastoForm.fecha : kmForm.fecha;
       let adjunto = null;
-      if (file) adjunto = await uploadAdjunto(file, { registroId: id });
+      if (file) adjunto = await uploadAdjunto(file, { registroId: id, username: session.username, fecha: fechaRegistro });
 
       const base = {
         id, username: session.username, tipo, estado: "pendiente",

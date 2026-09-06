@@ -1,5 +1,6 @@
 import { downloadJson, uploadJson, uploadBinary, getViewUrl } from "./googleDriveClient.js";
 import { buildSeedUsers } from "./seed.js";
+import { yearMonthFromFecha } from "../theme.js";
 
 const NAMES = {
   usuarios: "usuarios.json",
@@ -92,18 +93,29 @@ function extFor(file) {
   return "jpg";
 }
 
-/** Sube un adjunto (foto de ticket o PDF de factura) y devuelve su metadata para guardar en el registro. */
-export async function uploadAdjunto(file, { registroId }) {
+/**
+ * Sube un adjunto (foto de ticket o PDF de factura) organizado por Año/Mes/Persona
+ * según la fecha del gasto (no la fecha de subida), y devuelve su metadata para
+ * guardar en el registro.
+ */
+export async function uploadAdjunto(file, { registroId, username, fecha }) {
   const ext = extFor(file);
-  const subfolder = ext === "pdf" ? "facturas" : "tickets";
-  const filename = `${registroId}.${ext}`;
+  const prefijo = ext === "pdf" ? "factura" : "ticket";
+  const { year, month } = yearMonthFromFecha(fecha);
+  const filename = `${prefijo}_${registroId}.${ext}`;
   const bytes = await file.arrayBuffer();
-  const result = await uploadBinary(subfolder, filename, bytes, file.type || "application/octet-stream");
+  const result = await uploadBinary([year, month, username], filename, bytes, file.type || "application/octet-stream");
   return { fileId: result.id, tipo: ext === "pdf" ? "pdf" : "imagen", nombreOriginal: file.name || "" };
 }
 
 export async function uploadExport(bytes, filename, contentType) {
-  const result = await uploadBinary("exports", filename, bytes, contentType);
+  const result = await uploadBinary(["exports"], filename, bytes, contentType);
+  return result.name || filename;
+}
+
+/** Sube el informe mensual (PDF consolidado) a la carpeta del mes correspondiente, junto a las carpetas por persona. */
+export async function uploadInformeMensual(bytes, filename, year, month) {
+  const result = await uploadBinary([year, month], filename, bytes, "application/pdf");
   return result.name || filename;
 }
 

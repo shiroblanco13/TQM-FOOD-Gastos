@@ -24,6 +24,18 @@ export const CATEGORIAS_GASTO = [
   "Otros",
 ];
 
+export const MESES = [
+  "enero", "febrero", "marzo", "abril", "mayo", "junio",
+  "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre",
+];
+
+/** A partir de una fecha "YYYY-MM-DD" devuelve { year, month, monthIndex } sin problemas de zona horaria. */
+export function yearMonthFromFecha(fecha) {
+  const [year, monthStr] = String(fecha).split("-");
+  const monthIndex = parseInt(monthStr, 10) - 1;
+  return { year, month: MESES[monthIndex] || "sin-mes", monthIndex };
+}
+
 export const ROLES = {
   SUPERADMIN: "superadmin",
   ADMIN: "admin",

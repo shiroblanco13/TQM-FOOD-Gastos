@@ -9,8 +9,11 @@
 //   Netlify (google-oauth-exchange y google-token) que guardan el client_secret
 //   del lado servidor y nunca lo exponen al cliente.
 // - Los archivos se organizan dentro de UNA carpeta raíz en el Drive conectado
-//   ("Gastos internos TQM"), con subcarpetas tickets/, facturas/ y exports/, y los
-//   tres JSON (usuarios.json, gastos.json, config.json) en la raíz de esa carpeta.
+//   ("Gastos internos TQM"). Los tres JSON viven en su raíz, junto a una carpeta
+//   "exports/" para las exportaciones puntuales. Los adjuntos (fotos de ticket,
+//   PDFs de factura) se organizan por AÑO/MES/PERSONA según la fecha del gasto,
+//   p.ej. "2026/septiembre/m.marin/ticket_xxxx.jpg", creando esas carpetas sobre
+//   la marcha la primera vez que hacen falta.
 
 const CLIENT_ID = import.meta.env.VITE_GOOGLE_CLIENT_ID || "";
 const DEV_OVERRIDE_KEY = "gdrive_dev_refresh_token";
@@ -18,7 +21,6 @@ const SCOPE = "https://www.googleapis.com/auth/drive.file";
 const REDIRECT_URI = () => window.location.origin + window.location.pathname;
 
 const ROOT_FOLDER_NAME = "Gastos internos TQM";
-const SUBFOLDERS = ["tickets", "facturas", "exports"];
 
 let cachedToken = { value: null, expiresAt: 0 };
 let cachedFolderIds = null; // { root, tickets, facturas, exports }
@@ -175,21 +177,34 @@ async function createFolder(name, parentId) {
   return res.json();
 }
 
-/** Encuentra (o crea la primera vez) la carpeta raíz de la app y sus subcarpetas. Cachea los IDs en memoria durante la sesión. */
+/** Encuentra (o crea la primera vez) la carpeta raíz de la app y la carpeta "exports". Cachea los IDs en memoria durante la sesión. */
 export async function ensureAppFolders() {
   if (cachedFolderIds) return cachedFolderIds;
 
   let root = await findChild(ROOT_FOLDER_NAME, "root", true);
   if (!root) root = await createFolder(ROOT_FOLDER_NAME, "root");
 
-  const ids = { root: root.id };
-  for (const sub of SUBFOLDERS) {
-    let folder = await findChild(sub, root.id, true);
-    if (!folder) folder = await createFolder(sub, root.id);
-    ids[sub] = folder.id;
+  let exportsFolder = await findChild("exports", root.id, true);
+  if (!exportsFolder) exportsFolder = await createFolder("exports", root.id);
+
+  cachedFolderIds = { root: root.id, exports: exportsFolder.id };
+  return cachedFolderIds;
+}
+
+/**
+ * Encuentra o crea, nivel a nivel, una carpeta anidada dentro de la carpeta raíz
+ * de la app a partir de una lista de nombres, p.ej. ["2026", "septiembre", "m.marin"].
+ * Devuelve el ID de la última carpeta de la ruta.
+ */
+export async function ensureNestedFolder(segments) {
+  const { root } = await ensureAppFolders();
+  let parentId = root;
+  for (const segment of segments) {
+    let folder = await findChild(segment, parentId, true);
+    if (!folder) folder = await createFolder(segment, parentId);
+    parentId = folder.id;
   }
-  cachedFolderIds = ids;
-  return ids;
+  return parentId;
 }
 
 // ---------- Lectura / escritura de JSON ----------
@@ -252,10 +267,9 @@ export async function uploadJson(filename, data, fileId, expectedModifiedTime) {
 
 // ---------- Archivos adjuntos (imágenes / PDF) ----------
 
-/** Sube un archivo binario a una subcarpeta ("tickets" | "facturas" | "exports"). */
-export async function uploadBinary(subfolder, filename, bytesOrBlob, contentType) {
-  const folders = await ensureAppFolders();
-  const parentId = folders[subfolder];
+/** Sube un archivo binario a una ruta de carpetas dentro de la app, p.ej. ["2026","septiembre","m.marin"] o ["exports"]. Las crea si no existen. */
+export async function uploadBinary(pathSegments, filename, bytesOrBlob, contentType) {
+  const parentId = await ensureNestedFolder(pathSegments);
   const metadata = { name: filename, parents: [parentId] };
 
   const boundary = "gtqm" + Math.random().toString(36).slice(2);

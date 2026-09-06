@@ -124,14 +124,35 @@ Gastos internos TQM/
 ├── usuarios.json     — usuarios, roles, contraseñas (hash), estado
 ├── gastos.json       — todos los gastos y trayectos de kilometraje
 ├── config.json       — tarifa por km y ajustes generales
-├── tickets/          — fotos de tickets capturadas desde el móvil
-├── facturas/         — PDFs de facturas/justificantes subidos
-└── exports/          — copia automática de cada Excel/PDF exportado
+├── exports/          — copia automática de cada Excel/PDF exportado desde "Exportar"
+└── 2026/
+    ├── agosto/
+    │   ├── informe_agosto_2026.pdf      — si se generó un informe mensual
+    │   ├── m.marin/                     — fotos de ticket y PDFs de factura
+    │   ├── b.bori/                        de m.marin ese mes
+    │   └── ...
+    └── septiembre/
+        └── ...
 ```
+
+Los adjuntos de cada gasto o trayecto de kilometraje se guardan según la
+**fecha del propio gasto** (no la fecha en la que se sube), dentro de
+`AÑO/MES/usuario/`. Esas carpetas se crean solas la primera vez que hacen
+falta — no hay que crearlas a mano.
 
 La app usa el scope `drive.file` de Google (el más restringido posible):
 solo puede ver y modificar los archivos que ella misma ha creado, nunca
 el resto de tu Drive.
+
+## Informe mensual
+
+Desde la pestaña **Exportar**, además de las exportaciones filtradas,
+hay una sección **"Informe mensual"**: eligiendo mes, año y si se
+incluyen solo los aprobados o todos, genera un PDF con el desglose de
+gastos y kilometraje por persona (con subtotal de cada una) y el total
+del mes. Se descarga en el dispositivo y además se guarda automáticamente
+dentro de la carpeta de ese mes en Google Drive (junto a las carpetas de
+cada persona), como `informe_<mes>_<año>.pdf`.
 
 ## Cómo funciona el OCR
 
