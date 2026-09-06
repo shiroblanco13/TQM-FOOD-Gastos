@@ -1,5 +1,4 @@
 import React, { useState } from "react";
-import { Receipt } from "lucide-react";
 import { useApp } from "../context/AppContext.jsx";
 import { COLORS, FONT_DISPLAY, inputStyle, labelStyle, primaryBtn } from "../theme.js";
 import { FullScreenCenter, Card, Banner } from "./UI.jsx";
@@ -38,10 +37,11 @@ export default function Login() {
     <FullScreenCenter>
       <div style={{ textAlign: "center", marginBottom: 18 }}>
         <div style={{
-          width: 52, height: 52, borderRadius: 14, background: COLORS.navy, display: "flex",
-          alignItems: "center", justifyContent: "center", margin: "0 auto 10px",
+          background: "#fff", border: `1px solid ${COLORS.line}`, borderRadius: 14, display: "inline-flex",
+          alignItems: "center", justifyContent: "center", margin: "0 auto 14px", padding: "14px 20px",
+          boxShadow: "0 1px 3px rgba(28,37,54,0.06)",
         }}>
-          <Receipt size={26} color="#fff" />
+          <img src="/logo.png" alt="TQM Food" style={{ height: 40, display: "block" }} />
         </div>
         <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 20, color: COLORS.ink }}>
           Gastos internos

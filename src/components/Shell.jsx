@@ -36,14 +36,18 @@ export default function Shell() {
     <div style={{ minHeight: "100vh", background: COLORS.bg, display: "flex", flexDirection: "column" }}>
       <header style={{
         display: "flex", alignItems: "center", justifyContent: "space-between",
-        padding: "14px 16px", background: COLORS.paper, borderBottom: `1px solid ${COLORS.line}`,
+        padding: "10px 16px", background: COLORS.paper, borderBottom: `1px solid ${COLORS.line}`,
         position: "sticky", top: 0, zIndex: 5,
       }}>
-        <div>
-          <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 15, color: COLORS.ink }}>
-            {session.nombre || session.username}
+        <div style={{ display: "flex", alignItems: "center", gap: 10 }}>
+          <img src="/logo.png" alt="TQM Food" style={{ height: 26, display: "block" }} />
+          <div style={{ width: 1, height: 26, background: COLORS.line }} />
+          <div>
+            <div style={{ fontFamily: FONT_DISPLAY, fontWeight: 700, fontSize: 14, color: COLORS.ink, lineHeight: 1.2 }}>
+              {session.nombre || session.username}
+            </div>
+            <div style={{ fontSize: 10.5, color: COLORS.inkSoft }}>{ROLE_LABEL[session.rol]}</div>
           </div>
-          <div style={{ fontSize: 11, color: COLORS.inkSoft }}>{ROLE_LABEL[session.rol]} · TQM Food</div>
         </div>
         <div style={{ display: "flex", gap: 10, alignItems: "center" }}>
           <button onClick={() => setShowPasswordScreen(true)} title="Cambiar contraseña" style={iconBtnStyle}>

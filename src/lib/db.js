@@ -1,4 +1,4 @@
-import { downloadJson, uploadJson, uploadBinary, getViewUrl } from "./googleDriveClient.js";
+import { downloadJson, uploadJson, uploadBinary, getViewUrl, deleteFile } from "./googleDriveClient.js";
 import { buildSeedUsers } from "./seed.js";
 import { yearMonthFromFecha } from "../theme.js";
 
@@ -121,3 +121,13 @@ export async function uploadInformeMensual(bytes, filename, year, month) {
 
 export { getViewUrl };
 export { DEFAULT_CONFIG };
+
+/** Borra (best-effort) el adjunto de Drive de un registro. No lanza si falla: el registro se borra igualmente. */
+export async function borrarAdjuntoSiExiste(registro) {
+  if (!registro?.adjunto?.fileId) return;
+  try {
+    await deleteFile(registro.adjunto.fileId);
+  } catch {
+    /* si falla el borrado del archivo, no bloqueamos el borrado del registro */
+  }
+}

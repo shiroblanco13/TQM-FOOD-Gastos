@@ -76,6 +76,9 @@ export default function ExpenseNew() {
     setFile(f);
     setFilePreview(f.type === "application/pdf" ? null : URL.createObjectURL(f));
     setMsg(null);
+    // Al adjuntar un ticket nuevo, se borra el importe anterior para que nunca
+    // se pueda confundir con el de un ticket distinto si el OCR no detecta nada.
+    setGastoForm((f2) => ({ ...f2, importe: "" }));
   }
 
   function clearFile() {

@@ -309,3 +309,11 @@ export async function getViewUrl(fileId) {
   const blob = await res.blob();
   return URL.createObjectURL(blob);
 }
+
+/** Elimina un archivo de Drive por su fileId (usado al borrar un gasto pendiente con adjunto). */
+export async function deleteFile(fileId) {
+  const res = await authedFetch(`https://www.googleapis.com/drive/v3/files/${fileId}`, { method: "DELETE" });
+  if (!res.ok && res.status !== 404) {
+    throw new Error(`No se pudo eliminar el archivo adjunto (${res.status}).`);
+  }
+}
