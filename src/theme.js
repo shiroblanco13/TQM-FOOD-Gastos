@@ -1,19 +1,20 @@
 export const COLORS = {
-  bg: "#ECEEF2",
+  bg: "#F4F6F7",
   paper: "#FFFFFF",
-  ink: "#1C2536",
-  inkSoft: "#616B80",
-  line: "#D9DCE3",
-  amber: "#B9832A",
-  amberBg: "#F5EAD6",
-  green: "#2E6B4F",
-  greenBg: "#DFEDE6",
-  red: "#AC3A32",
-  redBg: "#F5DEDB",
-  navy: "#1C2536",
+  ink: "#1F2A2E",
+  inkSoft: "#6B7A80",
+  line: "#E3E9EA",
+  amber: "#D97706",
+  amberBg: "#FEF3C7",
+  green: "#059669",
+  greenBg: "#D1FAE5",
+  red: "#DC2626",
+  redBg: "#FEE2E2",
+  navy: "#0D9488",
+  navyBg: "#DDF5F2",
 };
 
-export const FONT_DISPLAY = "'Space Grotesk', sans-serif";
+export const FONT_DISPLAY = "'Inter', sans-serif";
 
 export const CATEGORIAS_GASTO = [
   "Dietas",
@@ -61,23 +62,26 @@ export const fmtDateTime = (ts) =>
 export const labelStyle = { fontSize: 12, color: COLORS.inkSoft, fontWeight: 600, display: "block", marginBottom: 4, marginTop: 2 };
 
 export const inputStyle = {
-  width: "100%", padding: "9px 10px", borderRadius: 8, border: `1px solid ${COLORS.line}`,
+  width: "100%", padding: "10px 12px", borderRadius: 11, border: `1.5px solid ${COLORS.line}`,
   marginBottom: 10, fontSize: 14, color: COLORS.ink, background: "#fff",
 };
 
 export const primaryBtn = {
-  width: "100%", background: COLORS.navy, color: "#fff", border: "none", borderRadius: 9,
-  padding: "11px 0", fontWeight: 600, fontSize: 14, cursor: "pointer",
+  width: "100%", background: COLORS.navy, color: "#fff", border: "none", borderRadius: 12,
+  padding: "12px 0", fontWeight: 700, fontSize: 14, cursor: "pointer",
+  boxShadow: "0 2px 6px rgba(13,148,136,0.28)",
 };
 
 export const secondaryBtn = {
   ...primaryBtn,
   background: "#fff",
   color: COLORS.ink,
-  border: `1px solid ${COLORS.line}`,
+  border: `1.5px solid ${COLORS.line}`,
+  boxShadow: "none",
 };
 
 export const dangerBtn = {
   ...primaryBtn,
   background: COLORS.red,
+  boxShadow: "0 2px 6px rgba(220,38,38,0.25)",
 };

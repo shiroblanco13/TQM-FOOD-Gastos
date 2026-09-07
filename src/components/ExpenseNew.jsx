@@ -4,7 +4,7 @@ import { useApp } from "../context/AppContext.jsx";
 import { saveGastos, uploadAdjunto } from "../lib/db.js";
 import { recognizeTicket, extractImporte, extractFecha } from "../lib/ocr.js";
 import { hasMapsKey, computeDistanceKm } from "../lib/googleMaps.js";
-import { CATEGORIAS_GASTO, COLORS, fmtMoney, inputStyle, labelStyle, primaryBtn, secondaryBtn } from "../theme.js";
+import { CATEGORIAS_GASTO, COLORS, FONT_DISPLAY, fmtMoney, inputStyle, labelStyle, primaryBtn, secondaryBtn } from "../theme.js";
 import { SectionTitle, Banner, Card } from "./UI.jsx";
 import AddressAutocomplete from "./AddressAutocomplete.jsx";
 
@@ -265,7 +265,7 @@ export default function ExpenseNew() {
 
             <Card style={{ marginBottom: 10, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
               <span style={{ fontSize: 12.5, color: COLORS.inkSoft }}>{kmForm.km || 0} km × {fmtMoney(tarifaKm)}/km</span>
-              <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: COLORS.ink }}>{fmtMoney(importeKm)}</span>
+              <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 800, color: COLORS.navy }}>{fmtMoney(importeKm)}</span>
             </Card>
 
             <label style={labelStyle}>Motivo</label>
@@ -288,8 +288,8 @@ export default function ExpenseNew() {
 function TypeToggle({ active, onClick, label }) {
   return (
     <button type="button" onClick={onClick} style={{
-      flex: 1, padding: "9px 0", borderRadius: 8, border: `1px solid ${active ? COLORS.ink : COLORS.line}`,
-      background: active ? COLORS.ink : "#fff", color: active ? "#fff" : COLORS.inkSoft,
+      flex: 1, padding: "10px 0", borderRadius: 11, border: `1.5px solid ${active ? COLORS.navy : COLORS.line}`,
+      background: active ? COLORS.navy : "#fff", color: active ? "#fff" : COLORS.inkSoft,
       fontWeight: 700, fontSize: 13, cursor: "pointer",
     }}>
       {label}

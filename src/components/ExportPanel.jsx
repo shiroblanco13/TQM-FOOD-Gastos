@@ -132,7 +132,7 @@ export default function ExportPanel() {
 
       <Card style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: 12.5, color: COLORS.inkSoft }}>{filtrados.length} registro(s)</span>
-        <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: COLORS.ink }}>{fmtMoney(total)}</span>
+        <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 800, color: COLORS.navy }}>{fmtMoney(total)}</span>
       </Card>
 
       {msg && <Banner tone={msg.tone}>{msg.text}</Banner>}
@@ -280,7 +280,7 @@ function InformeMensual({ gastos, usuarios }) {
 
       <Card style={{ marginBottom: 12, display: "flex", justifyContent: "space-between", alignItems: "center" }}>
         <span style={{ fontSize: 12.5, color: COLORS.inkSoft }}>{delMes.length} registro(s) ese mes</span>
-        <span style={{ fontFamily: "'Space Grotesk', sans-serif", fontWeight: 700, color: COLORS.ink }}>{fmtMoney(totalGeneral)}</span>
+        <span style={{ fontFamily: FONT_DISPLAY, fontWeight: 800, color: COLORS.navy }}>{fmtMoney(totalGeneral)}</span>
       </Card>
 
       {msg && <Banner tone={msg.tone}>{msg.text}</Banner>}
